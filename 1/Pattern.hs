@@ -23,7 +23,7 @@ match _ [] _ = Nothing
 match _ _ [] = Nothing
 match x (y:ys) (z:zs)
  | x == y = orElse (singleWildcardMatch (y:ys) (z:zs)) (longerWildcardMatch (y:ys) (z:zs)) -- Found wildcard
- | y == z = match x ys zs -- continue to match
+ | y == z = match x ys zs -- Continue to match
  | otherwise = Nothing 
 
 
