@@ -8,6 +8,7 @@ import Utilities
 
 -- Replaces a wildcard in a list with the list given as the third argument
 substitute :: Eq a => a -> [a] -> [a] -> [a]
+substitute _ [] [] = [] -- Empty lists
 substitute _ [] _ = [] -- Stop when list is empty
 substitute x (y:ys) zs	
  | x == y	= zs ++ (substitute x ys zs) -- x == y // y == x?
@@ -17,19 +18,24 @@ substitute x (y:ys) zs
 -- Tries to match two lists. If they match, the result consists of the sublist
 -- bound to the wildcard in the pattern list.
 match :: Eq a => a -> [a] -> [a] -> Maybe [a]
-match _ [] [] = Nothing  -- []?
+match _ [] [] = Just [] --Nothing  -- []?
 match _ [] _ = Nothing
 match _ _ [] = Nothing
-match 
-{- TO BE WRITTEN -}
+match x (y:ys) (z:zs)
+ | x == y = orElse (singleWildcardMatch (y:ys) (z:zs)) (longerWildcardMatch (y:ys) (z:zs)) -- Found wildcard
+ | y == z = match x ys zs -- continue to match
+ | otherwise = Nothing 
+
 
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs) = Nothing
-{- TO BE WRITTEN -}
-longerWildcardMatch (wc:ps) (x:xs) = Nothing
-{- TO BE WRITTEN -}
+singleWildcardMatch (wc:ps) (x:xs) 
+ | match wc ps xs /= Nothing = Just [x] 
+ | otherwise = Nothing
+
+longerWildcardMatch (wc:ps) (x:xs) = mmap (x:) (match wc (wc:ps) xs)
+
 
 
 
@@ -37,7 +43,7 @@ longerWildcardMatch (wc:ps) (x:xs) = Nothing
 
 
 testPattern =  "a=*;"
-testSubstitutions = "32"  -- ska vara 32
+testSubstitutions = "32"  
 testString = "a=32;"
 
 substituteTest = substitute '*' testPattern testSubstitutions
