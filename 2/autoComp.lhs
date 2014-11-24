@@ -1,33 +1,38 @@
-\section{Auto Comp}
+\section{Overview}
+This file describes how additional functions can be implemented together with Haskore, a library of Haskell modules that work with music.
 
 \begin{code}
 module AutoComp where
 import Haskore
 \end{code}
 
-Types
+\section{Datatypes}
+Following we have defined several datatypes that are critical in making the functions work.
 
 \begin{code}
+data Quality = ionian | lydian | mixolydian | aeolian | dorean | phrygian 
+	deriving (Eq,Ord,Ix,Show)
+	
+ionian         	=       [0, 2, 4, 5, 7, 9, 11]
+lydian			=       [0, 2, 4, 6, 7, 9, 11]
+mixolydian		=       [0, 2, 4, 5, 7, 9, 10]
+aeolian        	=       [0, 2, 3, 5, 7, 8, 10]
+dorean			=       [0, 2, 3, 5, 7, 9, 10]
+phrygian       	=       [0, 1, 3, 5, 7, 8, 10]
+
+type Key = (PitchClass, Quality)
 type Pitch = (PitchClass, Octave)
 type Octave = Int
 type Dur = Int
-type Key = (PitchClass, Quality)
 type Chord = -- (PitchClass, ???)
 type ChordProgression = [Chord]
 \end{code}
 
-Scales
+
+\section{autoBass}
+This function will generate a bass line in form of a Haskore music object from a bass pattern, chord progression and the key of the song.
 
 \begin{code}
-Ionian = [0, 2, 4, 5, 7, 9, 11]
-Lydian = [0, 2, 4, 6, 7, 9, 11]
-Mixolydian = [0, 2, 4, 5, 7, 9, 10]
-Aeolian = [0, 2, 3, 5, 7, 8, 10]
-Dorian = [0, 2, 3, 5, 7, 9, 10]
-Phrygian = [0, 1, 3, 5, 7, 8, 10]
-\end{code}
-
-\section{Function that will automatically generate a bass line.}
-\begin{code}
-autoBass :: BassStyle -> Key -> ChordProgression -> Music  -- [Chord]?
+autoBass :: BassStyle -> Key -> ChordProgression -> Music
+autoBass _ _ [] =
 \end{code}
