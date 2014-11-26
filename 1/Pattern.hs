@@ -21,18 +21,18 @@ match :: Eq a => a -> [a] -> [a] -> Maybe [a]
 match _ [] [] = Just [] --Nothing  -- []?
 match _ [] _ = Nothing
 match _ _ [] = Nothing
-match x (y:ys) (z:zs)
- | x == y = orElse (singleWildcardMatch (y:ys) (z:zs)) (longerWildcardMatch (y:ys) (z:zs)) -- Found wildcard
- | y == z = match x ys zs -- Continue to match
+match wc (p:ps) (x:xs)
+ | wc == p = orElse (singleWildcardMatch (p:ps) (x:xs)) (longerWildcardMatch (p:ps) (x:xs)) -- Found wildcard
+ | p == x = match wc ps xs -- Continue to match
  | otherwise = Nothing 
 
 
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs) 
- | match wc ps xs /= Nothing = Just [x] 
- | otherwise = Nothing
+singleWildcardMatch (wc:ps) (x:xs) = mmap (const [x]) (match wc ps xs)
+ -- | match wc ps xs /= Nothing = Just [x] 
+ -- | otherwise = Nothing
 
 longerWildcardMatch (wc:ps) (x:xs) = mmap (x:) (match wc (wc:ps) xs)
 
@@ -60,9 +60,9 @@ matchCheck = matchTest == Just testSubstitutions
 
 -- Applying a single pattern
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply wc f xs (ys, zs) = mmap ((substitute wc zs).f) (match wc ys xs)
+transformationApply wc f xs (ys, zs) = mmap (substitute wc zs . f) (match wc ys xs)
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply wc f xs ys = foldr1 (orElse) $ map (transformationApply wc f ys) xs
+transformationsApply wc f xs ys = foldr1 orElse $ map (transformationApply wc f ys) xs
 
