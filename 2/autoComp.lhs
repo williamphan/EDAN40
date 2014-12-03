@@ -1,4 +1,3 @@
-
 \begin{code}
 module AutoComp where
 import Haskore hiding (Key)
@@ -12,7 +11,7 @@ import Haskore hiding (Key)
 --type Dur = Int
 
 type Key = (Pitch, Quality)
-type Chord = PitchClass  -- Int ska vara många noter
+type Chord = [Int]  -- Int ska vara många noter
 type ChordProgression = [(Chord, Dur)] -- Dur motsvarar hur länge ett ackord ska vara
 
 
@@ -44,7 +43,7 @@ getPitch (x:xs) n
  | snd x == n = fst x
  | otherwise = getPitch xs n
 
---Bass pattern
+-- Bass pattern
 
 type BassStyle = [(Int, Dur)] -- vad är Int?
 basic, calypso, boogie :: BassStyle
@@ -52,13 +51,14 @@ basic = [(0, hn), (4, hn)]
 calypso = [(-1, qn), (0, en), (2, en), (-1, qn), (0, en), (2, en)]
 boogie = [ (0, en), (4, en), (5, en), (4, en), (0, en), (4, en), (5, en), (4, en)]
 
+autoBass :: BassStyle -> Key -> ChordProgression -> Music
+autoBass b k c = foldr (:+:) . map (bassLine b) c
 
 
---bassLine :: Key -> BassStyle -> ChordProgression -> [(Note, Dur)]
---bassLine _ _ [] = []
+-- Help function to generate bass pattern
 
---autoBass :: BassStyle -> Key -> ChordProgression -> Music
---autoBass b k c = line $ map asd
+bassLine :: BassStyle -> (Pitch, Dur) -> Music
+bassLine b p 
 
 
 \end{code}
