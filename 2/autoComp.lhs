@@ -3,14 +3,6 @@
 > import Data.Ratio
 > import Data.List
 
--- från Haskore
--- line: foldr1 (:+:)
--- chord: foldr1 (:=:)
-
---type Pitch = (PitchClass, Octave) 
---type Octave = Int
---type Dur = Int
-
 Now we will define a few datatypes which are critical to make the program and our functions work.
 
 > fd d n = n d v
@@ -21,11 +13,12 @@ Now we will define a few datatypes which are critical to make the program and ou
 > times  1    m = m
 > times n m = m :+: (times (n - 1) m)
 
-> type Key = (Pitch, Quality) -- Quality eller Dur?
-> type Chord = [Int]  
+> type Key = (PitchClass, Mode)
+> type Chord = [Pitch]  
 > type ChordProgression = [(Chord, Dur)]
+> type Scale = [Int]
 
-> type Quality = [Int]
+> type Scale = [Int]
 > ionian, lydian, mixolydian, aeolian, dorian, phrygian :: Quality
 > ionian = [0, 2, 4, 5, 7, 9, 11]
 > lydian = [0, 2, 4, 6, 7, 9, 11]
@@ -34,11 +27,12 @@ Now we will define a few datatypes which are critical to make the program and ou
 > dorian = [0, 2, 3, 5, 7, 9, 10]
 > phrygian = [0, 1, 3, 5, 7, 8, 10]
 
-> cMajor = [ionian, mixolydian, [], lydian, mixolydian, [], []]; -- cMinor också?
+> major = [ionian, mixolydian, [], lydian, mixolydian, [], []]
+> minor = [[], dorian, phrygian, [], [], aeolian, []]
 
 -----------------------------------------------------------------------------------------
 
-List of all notes with a paired Int
+List of all notes with a paired Int // TA BORT I SLUTET
 
 > noteList = zip (cycle [A, As, B, C, Cs, D, Ds, E, F, Fs, G, Gs]) [0, 1..]
 
@@ -88,8 +82,8 @@ Defining the three different types that a bass pattern can have.
 > half b = fst $ splitAt (length b `div` 2) b
 
 
-> keyScale :: Pitch -> Chord -> [Pitch]
-> keyScale p s = map pitch $ map (+ (absPitch p)) (cMajor !! maybe (-1) id (elemIndex (mod (absPitch p) 12) s))
+> keyScale :: Pitch -> Scale -> [Pitch]
+> keyScale p s = map pitch $ map (+ (absPitch p)) (major !! maybe (-1) id (elemIndex (mod (absPitch p) 12) s))
 
 -------------------------------------------------------------
 
