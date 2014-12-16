@@ -1,5 +1,7 @@
 > module AutoComp where
 > import Haskore hiding (Key)
+> import Data.Ratio
+> import Data.List
 
 -- från Haskore
 -- line: foldr1 (:+:)
@@ -11,9 +13,18 @@
 
 Now we will define a few datatypes which are critical to make the program and our functions work.
 
-> type Key = (Pitch, Quality)
+> fd d n = n d v
+> vol  n = n   v
+> v      = [Volume 80]
+> cmap f l = chord (map f l)
+> lmap f l = line (map f l)
+> times  1    m = m
+> times n m = m :+: (times (n - 1) m)
+
+> type Key = (Pitch, Quality) -- Quality eller Dur?
 > type Chord = [Int]  
 > type ChordProgression = [(Chord, Dur)]
+
 > type Quality = [Int]
 > ionian, lydian, mixolydian, aeolian, dorian, phrygian :: Quality
 > ionian = [0, 2, 4, 5, 7, 9, 11]
@@ -23,6 +34,9 @@ Now we will define a few datatypes which are critical to make the program and ou
 > dorian = [0, 2, 3, 5, 7, 9, 10]
 > phrygian = [0, 1, 3, 5, 7, 8, 10]
 
+> cMajor = [ionian, mixolydian, [], lydian, mixolydian, [], []]; -- cMinor också?
+
+-----------------------------------------------------------------------------------------
 
 List of all notes with a paired Int
 
@@ -35,7 +49,6 @@ Function to retrieve a matching Int from the list above
 >  | fst x == p = snd x 
 >  | otherwise = getInt xs p 
 
-
 From Int to pitch
 
 > getPitch :: [(PitchClass, Int)] -> Int -> PitchClass
@@ -43,6 +56,7 @@ From Int to pitch
 >  | snd x == n = fst x
 >  | otherwise = getPitch xs n
 
+-----------------------------------------------------------------------------------------
 
 Defining the three different types that a bass pattern can have.
 
@@ -52,12 +66,39 @@ Defining the three different types that a bass pattern can have.
 > calypso = [(-1, qn), (0, en), (2, en), (-1, qn), (0, en), (2, en)]
 > boogie = [ (0, en), (4, en), (5, en), (4, en), (0, en), (4, en), (5, en), (4, en)]
 
-
 > autoBass :: BassStyle -> Key -> ChordProgression -> Music
-> autoBass b k c = line $ map (bassLine b k) c
-
-
-Help function to generate bass 
+> autoBass b k c = foldr1 (:+:) $ map (bassLine b k) c 
 
 > bassLine :: BassStyle -> Key -> Music
-> -- bassLine b k
+> bassLine b k
+> 	| snd k == hn = foldr1 (:+:) $ pitchDur (bassScale (half b) (keyScale (fst k) ionian)) (half b)
+>	| otherwise = foldr1 (:+:) $ pitchDur (bassScale b (keyScale (fst k) ionian)) b
+
+> bassScale :: BassStyle -> [Pitch] -> [Pitch]
+> bassScale b ps = map ((!!) ps) (map  fst b)
+
+> pitchDur :: [Pitch] -> BassStyle -> [Music]
+> pitchDur (p:ps) (b:bs)
+>	| null ps || null bs = [Note p (snd b) v]
+>	| (null ps || null bs) && (fst b) == -1 = [Rest (snd b)]
+>	| (fst b) == -1 = (Rest (snd b)) : pitchDur ps bs
+>	| otherwise =  (Note p (snd b) v) : pitchDur ps bs
+
+> half :: BassStyle -> BassStyle
+> half b = fst $ splitAt (length b `div` 2) b
+
+
+> keyScale :: Pitch -> Chord -> [Pitch]
+> keyScale p s = map pitch $ map (+ (absPitch p)) (cMajor !! maybe (-1) id (elemIndex (mod (absPitch p) 12) s))
+
+-------------------------------------------------------------
+
+{-
+
+autoChord :: Key -> ChordProgression -> Music
+autoChord k c = 
+
+autoComp :: BassStyle -> Key -> ChordProgression -> Music
+autoComp s k c = 
+
+-}
